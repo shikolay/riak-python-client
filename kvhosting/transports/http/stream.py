@@ -3,9 +3,9 @@ import re
 
 from cgi import parse_header
 from email import message_from_string
-from riak.util import decode_index_value
-from riak.client.index_page import CONTINUATION
-from riak import RiakError
+from kvhosting.util import decode_index_value
+from kvhosting.client.index_page import CONTINUATION
+from kvhosting import RiakError
 from six import PY2
 
 

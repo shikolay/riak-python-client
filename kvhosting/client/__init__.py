@@ -6,18 +6,18 @@ except ImportError:
 import random
 
 from weakref import WeakValueDictionary
-from riak.client.operations import RiakClientOperations
-from riak.node import RiakNode
-from riak.bucket import RiakBucket, BucketType
-from riak.mapreduce import RiakMapReduceChain
-from riak.resolver import default_resolver
-from riak.table import Table
-from riak.transports.http import HttpPool
-from riak.transports.tcp import TcpPool
-from riak.security import SecurityCreds
-from riak.util import lazy_property, bytes_to_str, str_to_bytes
+from kvhosting.client.operations import RiakClientOperations
+from kvhosting.node import RiakNode
+from kvhosting.bucket import RiakBucket, BucketType
+from kvhosting.mapreduce import RiakMapReduceChain
+from kvhosting.resolver import default_resolver
+from kvhosting.table import Table
+from kvhosting.transports.http import HttpPool
+from kvhosting.transports.tcp import TcpPool
+from kvhosting.security import SecurityCreds
+from kvhosting.util import lazy_property, bytes_to_str, str_to_bytes
 from six import string_types, PY2
-from riak.client.multi import MultiGetPool, MultiPutPool
+from kvhosting.client.multi import MultiGetPool, MultiPutPool
 
 
 def default_encoder(obj):

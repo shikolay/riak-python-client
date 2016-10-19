@@ -2,10 +2,10 @@ import datetime
 import random
 import sys
 
-import riak.benchmark as benchmark
+import kvhosting.benchmark as benchmark
 
 from multiprocessing import cpu_count
-from riak import RiakClient
+from kvhosting import RiakClient
 
 # logger = logging.getLogger()
 # logger.level = logging.DEBUG

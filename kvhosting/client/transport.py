@@ -1,7 +1,7 @@
 from contextlib import contextmanager
-from riak.transports.pool import BadResource
-from riak.transports.tcp import is_retryable as is_tcp_retryable
-from riak.transports.http import is_retryable as is_http_retryable
+from kvhosting.transports.pool import BadResource
+from kvhosting.transports.tcp import is_retryable as is_tcp_retryable
+from kvhosting.transports.http import is_retryable as is_http_retryable
 import threading
 from six import PY2
 if PY2:

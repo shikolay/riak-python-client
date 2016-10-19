@@ -1,7 +1,7 @@
 import six
 
 from .datatype import Datatype
-from riak.datatypes import TYPES
+from kvhosting.datatypes import TYPES
 
 __all__ = ['Hll']
 

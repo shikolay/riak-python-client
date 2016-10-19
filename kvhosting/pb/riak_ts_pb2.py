@@ -10,7 +10,7 @@ from google.protobuf import descriptor_pb2
 # @@protoc_insertion_point(imports)
 
 
-import riak.pb.riak_pb2
+import kvhosting.pb.riak_pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
@@ -775,7 +775,7 @@ _TSGETRESP.fields_by_name['rows'].message_type = _TSROW
 _TSPUTREQ.fields_by_name['columns'].message_type = _TSCOLUMNDESCRIPTION
 _TSPUTREQ.fields_by_name['rows'].message_type = _TSROW
 _TSDELREQ.fields_by_name['key'].message_type = _TSCELL
-_TSINTERPOLATION.fields_by_name['interpolations'].message_type = riak.pb.riak_pb2._RPBPAIR
+_TSINTERPOLATION.fields_by_name['interpolations'].message_type = kvhosting.pb.riak_pb2._RPBPAIR
 _TSCOLUMNDESCRIPTION.fields_by_name['type'].enum_type = _TSCOLUMNTYPE
 _TSROW.fields_by_name['cells'].message_type = _TSCELL
 _TSLISTKEYSRESP.fields_by_name['keys'].message_type = _TSROW

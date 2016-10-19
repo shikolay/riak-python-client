@@ -17,7 +17,7 @@ under the License.
 """
 
 import socket
-from riak.security import SecurityError, USE_STDLIB_SSL
+from kvhosting.security import SecurityError, USE_STDLIB_SSL
 if USE_STDLIB_SSL:
     import ssl
 else:
@@ -47,7 +47,7 @@ if USE_STDLIB_SSL:
         measures, e.g., hostname check.
 
         :param credentials: Riak Security Credentials
-        :type credentials: :class:`~riak.security.SecurityCreds`
+        :type credentials: :class:`~kvhosting.security.SecurityCreds`
         :rtype :class:`~ssl.SSLContext`
         """
 
@@ -95,7 +95,7 @@ else:
         Set various options on the SSL context for Python <= 2.7.8.
 
         :param credentials: Riak Security Credentials
-        :type credentials: :class:`~riak.security.SecurityCreds`
+        :type credentials: :class:`~kvhosting.security.SecurityCreds`
         :rtype ssl_ctx: :class:`~OpenSSL.SSL.Context`
         """
 

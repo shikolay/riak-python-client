@@ -16,8 +16,8 @@ specific language governing permissions and limitations
 under the License.
 """
 
-from riak.datatypes.datatype import Datatype
-from riak.datatypes import TYPES
+from kvhosting.datatypes.datatype import Datatype
+from kvhosting.datatypes import TYPES
 
 
 class Flag(Datatype):

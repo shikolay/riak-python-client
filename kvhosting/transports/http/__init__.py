@@ -2,16 +2,16 @@ import socket
 import select
 
 from six import PY2
-from riak.security import SecurityError, USE_STDLIB_SSL
-from riak.transports.pool import Pool
-from riak.transports.http.transport import HttpTransport
+from kvhosting.security import SecurityError, USE_STDLIB_SSL
+from kvhosting.transports.pool import Pool
+from kvhosting.transports.http.transport import HttpTransport
 
 if USE_STDLIB_SSL:
     import ssl
-    from riak.transports.security import configure_ssl_context
+    from kvhosting.transports.security import configure_ssl_context
 else:
     import OpenSSL.SSL
-    from riak.transports.security import RiakWrappedSocket,\
+    from kvhosting.transports.security import RiakWrappedSocket,\
         configure_pyopenssl_context
 
 if PY2:

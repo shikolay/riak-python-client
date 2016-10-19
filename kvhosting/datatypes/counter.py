@@ -1,7 +1,7 @@
 import six
 
-from riak.datatypes.datatype import Datatype
-from riak.datatypes import TYPES
+from kvhosting.datatypes.datatype import Datatype
+from kvhosting.datatypes import TYPES
 
 
 class Counter(Datatype):

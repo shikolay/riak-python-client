@@ -9,7 +9,7 @@ import socket
 import time
 import stat
 from subprocess import Popen, PIPE
-from riak.util import deep_merge
+from kvhosting.util import deep_merge
 from six import string_types
 
 try:

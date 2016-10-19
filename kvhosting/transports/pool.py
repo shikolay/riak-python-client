@@ -60,7 +60,7 @@ class Pool(object):
 
     Example::
 
-        from riak.Pool import Pool, BadResource
+        from kvhosting.Pool import Pool, BadResource
         class ListPool(Pool):
             def create_resource(self):
                 return []

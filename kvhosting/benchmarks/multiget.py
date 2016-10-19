@@ -1,9 +1,9 @@
 import binascii
 import os
 
-import riak.benchmark as benchmark
+import kvhosting.benchmark as benchmark
 
-from riak import RiakClient
+from kvhosting import RiakClient
 from multiprocessing import cpu_count
 
 nodes = [

@@ -2,7 +2,7 @@ import collections
 
 from .datatype import Datatype
 from six import string_types
-from riak.datatypes import TYPES
+from kvhosting.datatypes import TYPES
 
 __all__ = ['Set']
 

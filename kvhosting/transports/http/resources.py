@@ -1,8 +1,8 @@
 import re
 
 from six import PY2
-from riak import RiakError
-from riak.util import lazy_property, bytes_to_str
+from kvhosting import RiakError
+from kvhosting.util import lazy_property, bytes_to_str
 
 if PY2:
     from urllib import quote_plus, urlencode

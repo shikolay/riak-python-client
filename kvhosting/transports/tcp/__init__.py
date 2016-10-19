@@ -1,8 +1,8 @@
 import errno
 import socket
 
-from riak.transports.pool import Pool
-from riak.transports.tcp.transport import TcpTransport
+from kvhosting.transports.pool import Pool
+from kvhosting.transports.tcp.transport import TcpTransport
 
 
 class TcpPool(Pool):

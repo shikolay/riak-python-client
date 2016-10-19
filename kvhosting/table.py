@@ -45,7 +45,7 @@ class Table(object):
         :type columns: list
         :rtype: :class:`~riak.ts_object.TsObject`
         """
-        from riak.ts_object import TsObject
+        from kvhosting.ts_object import TsObject
 
         return TsObject(self._client, self, rows, columns)
 

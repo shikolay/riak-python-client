@@ -1,13 +1,13 @@
 import six
 
-import riak.client.multi
+import kvhosting.client.multi
 
-from riak.client.transport import RiakClientTransport, \
+from kvhosting.client.transport import RiakClientTransport, \
     retryable, retryableHttpOnly
-from riak.client.index_page import IndexPage
-from riak.datatypes import TYPES
-from riak.table import Table
-from riak.util import bytes_to_str
+from kvhosting.client.index_page import IndexPage
+from kvhosting.datatypes import TYPES
+from kvhosting.table import Table
+from kvhosting.util import bytes_to_str
 
 
 class RiakClientOperations(RiakClientTransport):

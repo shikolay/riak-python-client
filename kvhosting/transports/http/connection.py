@@ -1,7 +1,7 @@
 import base64
 
 from six import PY2
-from riak.util import str_to_bytes
+from kvhosting.util import str_to_bytes
 
 if PY2:
     from httplib import NotConnected, HTTPConnection

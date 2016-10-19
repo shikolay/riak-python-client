@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 import unittest
-import riak.datatypes as datatypes
+import kvhosting.datatypes as datatypes
 
-from riak import RiakError, RiakBucket, BucketType, RiakObject
-from riak.tests import RUN_DATATYPES, RUN_DATATYPE_HLL
-from riak.tests.base import IntegrationTestBase
-from riak.tests.comparison import Comparison
+from kvhosting import RiakError, RiakBucket, BucketType, RiakObject
+from kvhosting.tests import RUN_DATATYPES, RUN_DATATYPE_HLL
+from kvhosting.tests.base import IntegrationTestBase
+from kvhosting.tests.comparison import Comparison
 
 
 class DatatypeUnitTestBase(object):

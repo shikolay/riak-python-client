@@ -1,10 +1,10 @@
 import json
 
-import riak.pb.messages
+import kvhosting.pb.messages
 
-from riak.util import decode_index_value, bytes_to_str
-from riak.client.index_page import CONTINUATION
-from riak.codecs.ttb import TtbCodec
+from kvhosting.util import decode_index_value, bytes_to_str
+from kvhosting.client.index_page import CONTINUATION
+from kvhosting.codecs.ttb import TtbCodec
 from six import PY2
 
 
@@ -73,7 +73,7 @@ class PbufKeyStream(PbufStream):
     Used internally by TcpTransport to implement key-list streams.
     """
 
-    _expect = riak.pb.messages.MSG_CODE_LIST_KEYS_RESP
+    _expect = kvhosting.pb.messages.MSG_CODE_LIST_KEYS_RESP
 
     def next(self):
         response = super(PbufKeyStream, self).next()
@@ -94,7 +94,7 @@ class PbufMapredStream(PbufStream):
     streams.
     """
 
-    _expect = riak.pb.messages.MSG_CODE_MAP_RED_RESP
+    _expect = kvhosting.pb.messages.MSG_CODE_MAP_RED_RESP
 
     def next(self):
         response = super(PbufMapredStream, self).next()
@@ -114,7 +114,7 @@ class PbufBucketStream(PbufStream):
     Used internally by TcpTransport to implement key-list streams.
     """
 
-    _expect = riak.pb.messages.MSG_CODE_LIST_BUCKETS_RESP
+    _expect = kvhosting.pb.messages.MSG_CODE_LIST_BUCKETS_RESP
 
     def next(self):
         response = super(PbufBucketStream, self).next()
@@ -135,7 +135,7 @@ class PbufIndexStream(PbufStream):
     streams.
     """
 
-    _expect = riak.pb.messages.MSG_CODE_INDEX_RESP
+    _expect = kvhosting.pb.messages.MSG_CODE_INDEX_RESP
 
     def __init__(self, transport, codec, index, return_terms=False):
         super(PbufIndexStream, self).__init__(transport, codec)
@@ -172,7 +172,7 @@ class PbufTsKeyStream(PbufStream, TtbCodec):
     Used internally by TcpTransport to implement TS key-list streams.
     """
 
-    _expect = riak.pb.messages.MSG_CODE_TS_LIST_KEYS_RESP
+    _expect = kvhosting.pb.messages.MSG_CODE_TS_LIST_KEYS_RESP
 
     def __init__(self, transport, codec, convert_timestamp=False):
         super(PbufTsKeyStream, self).__init__(transport, codec)

@@ -1,7 +1,7 @@
 import collections
 
-from riak import RiakError
-from riak.table import Table
+from kvhosting import RiakError
+from kvhosting.table import Table
 
 TsColumns = collections.namedtuple('TsColumns', ['names', 'types'])
 

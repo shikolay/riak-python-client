@@ -9,7 +9,7 @@ from google.protobuf import descriptor_pb2
 # @@protoc_insertion_point(imports)
 
 
-import riak.pb.riak_pb2
+import kvhosting.pb.riak_pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
@@ -1740,13 +1740,13 @@ _RPBPUTREQ.fields_by_name['content'].message_type = _RPBCONTENT
 _RPBPUTRESP.fields_by_name['content'].message_type = _RPBCONTENT
 _RPBINDEXREQ.fields_by_name['qtype'].enum_type = _RPBINDEXREQ_INDEXQUERYTYPE
 _RPBINDEXREQ_INDEXQUERYTYPE.containing_type = _RPBINDEXREQ;
-_RPBINDEXRESP.fields_by_name['results'].message_type = riak.pb.riak_pb2._RPBPAIR
+_RPBINDEXRESP.fields_by_name['results'].message_type = kvhosting.pb.riak_pb2._RPBPAIR
 _RPBINDEXBODYRESP.fields_by_name['objects'].message_type = _RPBINDEXOBJECT
 _RPBCSBUCKETRESP.fields_by_name['objects'].message_type = _RPBINDEXOBJECT
 _RPBINDEXOBJECT.fields_by_name['object'].message_type = _RPBGETRESP
 _RPBCONTENT.fields_by_name['links'].message_type = _RPBLINK
-_RPBCONTENT.fields_by_name['usermeta'].message_type = riak.pb.riak_pb2._RPBPAIR
-_RPBCONTENT.fields_by_name['indexes'].message_type = riak.pb.riak_pb2._RPBPAIR
+_RPBCONTENT.fields_by_name['usermeta'].message_type = kvhosting.pb.riak_pb2._RPBPAIR
+_RPBCONTENT.fields_by_name['indexes'].message_type = kvhosting.pb.riak_pb2._RPBPAIR
 _RPBGETBUCKETKEYPREFLISTRESP.fields_by_name['preflist'].message_type = _RPBBUCKETKEYPREFLISTITEM
 _RPBCOVERAGERESP.fields_by_name['entries'].message_type = _RPBCOVERAGEENTRY
 DESCRIPTOR.message_types_by_name['RpbGetClientIdResp'] = _RPBGETCLIENTIDRESP

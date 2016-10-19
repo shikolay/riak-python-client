@@ -20,9 +20,9 @@ under the License.
 
 from __future__ import print_function
 from collections import Iterable, namedtuple
-from riak import RiakError
+from kvhosting import RiakError
 from six import string_types, PY2
-from riak.bucket import RiakBucket
+from kvhosting.bucket import RiakBucket
 
 
 #: Links are just bucket/key/tag tuples, this class provides a
@@ -68,7 +68,7 @@ class RiakMapReduce(object):
         :type bucket_type: string, None
         :rtype: :class:`RiakMapReduce`
         """
-        from riak.riak_object import RiakObject
+        from kvhosting.riak_object import RiakObject
         if (arg2 is None) and (arg3 is None):
             if isinstance(arg1, RiakObject):
                 return self.add_object(arg1)

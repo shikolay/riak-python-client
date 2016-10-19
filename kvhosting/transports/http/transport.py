@@ -6,18 +6,18 @@ except ImportError:
 from six import PY2
 from xml.dom.minidom import Document
 
-from riak import RiakError
-from riak.codecs.http import HttpCodec
-from riak.transports.transport import Transport
-from riak.transports.http.resources import HttpResources
-from riak.transports.http.connection import HttpConnection
-from riak.transports.http.stream import (
+from kvhosting import RiakError
+from kvhosting.codecs.http import HttpCodec
+from kvhosting.transports.transport import Transport
+from kvhosting.transports.http.resources import HttpResources
+from kvhosting.transports.http.connection import HttpConnection
+from kvhosting.transports.http.stream import (
     HttpKeyStream,
     HttpMapReduceStream,
     HttpBucketStream,
     HttpIndexStream)
-from riak.security import SecurityError
-from riak.util import decode_index_value, bytes_to_str, str_to_long
+from kvhosting.security import SecurityError
+from kvhosting.util import decode_index_value, bytes_to_str, str_to_long
 
 if PY2:
     from httplib import HTTPConnection
@@ -765,7 +765,7 @@ class HttpTransport(Transport,
         Get the preflist for a bucket/key
 
         :param bucket: Riak Bucket
-        :type bucket: :class:`~riak.bucket.RiakBucket`
+        :type bucket: :class:`~kvhosting.bucket.RiakBucket`
         :param key: Riak Key
         :type key: string
         :rtype: list of dicts

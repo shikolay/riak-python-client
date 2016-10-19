@@ -1,10 +1,10 @@
 import collections
 
-import riak.pb.messages
+import kvhosting.pb.messages
 
-from riak import RiakError
-from riak.codecs.util import parse_pbuf_msg
-from riak.util import bytes_to_str
+from kvhosting import RiakError
+from kvhosting.codecs.util import parse_pbuf_msg
+from kvhosting.util import bytes_to_str
 
 Msg = collections.namedtuple('Msg',
                              ['msg_code', 'data', 'resp_code'],
@@ -21,7 +21,7 @@ class Codec(object):
                             % (resp_code, expect))
 
     def maybe_riak_error(self, msg_code, data=None):
-        if msg_code == riak.pb.messages.MSG_CODE_ERROR_RESP:
+        if msg_code == kvhosting.pb.messages.MSG_CODE_ERROR_RESP:
             if data is None:
                 raise RiakError('no error provided!')
             else:

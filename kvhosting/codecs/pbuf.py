@@ -1,22 +1,22 @@
 import datetime
 import six
 
-import riak.pb.messages
-import riak.pb.riak_pb2
-import riak.pb.riak_dt_pb2
-import riak.pb.riak_kv_pb2
-import riak.pb.riak_ts_pb2
+import kvhosting.pb.messages
+import kvhosting.pb.riak_pb2
+import kvhosting.pb.riak_dt_pb2
+import kvhosting.pb.riak_kv_pb2
+import kvhosting.pb.riak_ts_pb2
 
-from riak import RiakError
-from riak.codecs import Codec, Msg
-from riak.codecs.util import parse_pbuf_msg
-from riak.content import RiakContent
-from riak.pb.riak_ts_pb2 import TsColumnType
-from riak.riak_object import VClock
-from riak.ts_object import TsColumns
-from riak.util import decode_index_value, str_to_bytes, bytes_to_str, \
+from kvhosting import RiakError
+from kvhosting.codecs import Codec, Msg
+from kvhosting.codecs.util import parse_pbuf_msg
+from kvhosting.content import RiakContent
+from kvhosting.pb.riak_ts_pb2 import TsColumnType
+from kvhosting.riak_object import VClock
+from kvhosting.ts_object import TsColumns
+from kvhosting.util import decode_index_value, str_to_bytes, bytes_to_str, \
     unix_time_millis, datetime_from_unix_time_millis
-from riak.multidict import MultiDict
+from kvhosting.multidict import MultiDict
 
 
 def _invert(d):
@@ -27,10 +27,10 @@ def _invert(d):
     return out
 
 REPL_TO_PY = {
-    riak.pb.riak_pb2.RpbBucketProps.FALSE: False,
-    riak.pb.riak_pb2.RpbBucketProps.TRUE: True,
-    riak.pb.riak_pb2.RpbBucketProps.REALTIME: 'realtime',
-    riak.pb.riak_pb2.RpbBucketProps.FULLSYNC: 'fullsync'
+    kvhosting.pb.riak_pb2.RpbBucketProps.FALSE: False,
+    kvhosting.pb.riak_pb2.RpbBucketProps.TRUE: True,
+    kvhosting.pb.riak_pb2.RpbBucketProps.REALTIME: 'realtime',
+    kvhosting.pb.riak_pb2.RpbBucketProps.FULLSYNC: 'fullsync'
 }
 
 REPL_TO_PB = _invert(REPL_TO_PY)
@@ -56,23 +56,23 @@ MODFUN_PROPS = ['chash_keyfun', 'linkfun']
 QUORUM_PROPS = ['r', 'pr', 'w', 'pw', 'dw', 'rw']
 
 MAP_FIELD_TYPES = {
-    riak.pb.riak_dt_pb2.MapField.COUNTER: 'counter',
-    riak.pb.riak_dt_pb2.MapField.SET: 'set',
-    riak.pb.riak_dt_pb2.MapField.REGISTER: 'register',
-    riak.pb.riak_dt_pb2.MapField.FLAG: 'flag',
-    riak.pb.riak_dt_pb2.MapField.MAP: 'map',
-    'counter': riak.pb.riak_dt_pb2.MapField.COUNTER,
-    'set': riak.pb.riak_dt_pb2.MapField.SET,
-    'register': riak.pb.riak_dt_pb2.MapField.REGISTER,
-    'flag': riak.pb.riak_dt_pb2.MapField.FLAG,
-    'map': riak.pb.riak_dt_pb2.MapField.MAP
+    kvhosting.pb.riak_dt_pb2.MapField.COUNTER: 'counter',
+    kvhosting.pb.riak_dt_pb2.MapField.SET: 'set',
+    kvhosting.pb.riak_dt_pb2.MapField.REGISTER: 'register',
+    kvhosting.pb.riak_dt_pb2.MapField.FLAG: 'flag',
+    kvhosting.pb.riak_dt_pb2.MapField.MAP: 'map',
+    'counter': kvhosting.pb.riak_dt_pb2.MapField.COUNTER,
+    'set': kvhosting.pb.riak_dt_pb2.MapField.SET,
+    'register': kvhosting.pb.riak_dt_pb2.MapField.REGISTER,
+    'flag': kvhosting.pb.riak_dt_pb2.MapField.FLAG,
+    'map': kvhosting.pb.riak_dt_pb2.MapField.MAP
 }
 
 DT_FETCH_TYPES = {
-    riak.pb.riak_dt_pb2.DtFetchResp.COUNTER: 'counter',
-    riak.pb.riak_dt_pb2.DtFetchResp.SET: 'set',
-    riak.pb.riak_dt_pb2.DtFetchResp.MAP: 'map',
-    riak.pb.riak_dt_pb2.DtFetchResp.HLL: 'hll'
+    kvhosting.pb.riak_dt_pb2.DtFetchResp.COUNTER: 'counter',
+    kvhosting.pb.riak_dt_pb2.DtFetchResp.SET: 'set',
+    kvhosting.pb.riak_dt_pb2.DtFetchResp.MAP: 'map',
+    kvhosting.pb.riak_dt_pb2.DtFetchResp.HLL: 'hll'
 }
 
 
@@ -84,7 +84,7 @@ class PbufCodec(Codec):
     def __init__(self,
                  client_timeouts=False, quorum_controls=False,
                  tombstone_vclocks=False, bucket_types=False):
-        if riak.pb is None:
+        if kvhosting.pb is None:
             raise NotImplementedError("this codec is not available")
         self._client_timeouts = client_timeouts
         self._quorum_controls = quorum_controls
@@ -95,16 +95,16 @@ class PbufCodec(Codec):
         return parse_pbuf_msg(msg_code, data)
 
     def encode_auth(self, username, password):
-        req = riak.pb.riak_pb2.RpbAuthReq()
+        req = kvhosting.pb.riak_pb2.RpbAuthReq()
         req.user = str_to_bytes(username)
         req.password = str_to_bytes(password)
-        mc = riak.pb.messages.MSG_CODE_AUTH_REQ
-        rc = riak.pb.messages.MSG_CODE_AUTH_RESP
+        mc = kvhosting.pb.messages.MSG_CODE_AUTH_REQ
+        rc = kvhosting.pb.messages.MSG_CODE_AUTH_RESP
         return Msg(mc, req.SerializeToString(), rc)
 
     def encode_ping(self):
-        return Msg(riak.pb.messages.MSG_CODE_PING_REQ, None,
-                   riak.pb.messages.MSG_CODE_PING_RESP)
+        return Msg(kvhosting.pb.messages.MSG_CODE_PING_REQ, None,
+                   kvhosting.pb.messages.MSG_CODE_PING_RESP)
 
     def encode_quorum(self, rw):
         """
@@ -160,7 +160,7 @@ class PbufCodec(Codec):
         a RiakObject.
 
         :param rpb_content: a single RpbContent message
-        :type rpb_content: riak.pb.riak_pb2.RpbContent
+        :type rpb_content: kvhosting.pb.riak_pb2.RpbContent
         :param sibling: a RiakContent sibling container
         :type sibling: RiakContent
         :rtype: RiakContent
@@ -205,7 +205,7 @@ class PbufCodec(Codec):
         :param robj: a RiakObject
         :type robj: RiakObject
         :param rpb_content: the protobuf message to fill
-        :type rpb_content: riak.pb.riak_pb2.RpbContent
+        :type rpb_content: kvhosting.pb.riak_pb2.RpbContent
         """
         if robj.content_type:
             rpb_content.content_type = str_to_bytes(robj.content_type)
@@ -247,7 +247,7 @@ class PbufCodec(Codec):
         Decodes an RpbLink message into a tuple
 
         :param link: an RpbLink message
-        :type link: riak.pb.riak_pb2.RpbLink
+        :type link: kvhosting.pb.riak_pb2.RpbLink
         :rtype tuple
         """
 
@@ -287,7 +287,7 @@ class PbufCodec(Codec):
         :param props: bucket properties
         :type props: dict
         :param msg: the protobuf message to fill
-        :type msg: riak.pb.riak_pb2.RpbSetBucketReq
+        :type msg: kvhosting.pb.riak_pb2.RpbSetBucketReq
         """
         for prop in NORMAL_PROPS:
             if prop in props and props[prop] is not None:
@@ -320,7 +320,7 @@ class PbufCodec(Codec):
         Decodes the protobuf bucket properties message into a dict.
 
         :param msg: the protobuf message to decode
-        :type msg: riak.pb.riak_pb2.RpbBucketProps
+        :type msg: kvhosting.pb.riak_pb2.RpbBucketProps
         :rtype dict
         """
         props = {}
@@ -348,7 +348,7 @@ class PbufCodec(Codec):
         'fun' keys. Used in bucket properties.
 
         :param modfun: the protobuf message to decode
-        :type modfun: riak.pb.riak_pb2.RpbModFun
+        :type modfun: kvhosting.pb.riak_pb2.RpbModFun
         :rtype dict
         """
         return {'mod': bytes_to_str(modfun.module),
@@ -362,11 +362,11 @@ class PbufCodec(Codec):
         :param props: the module/function pair
         :type props: dict
         :param msg: the protobuf message to fill
-        :type msg: riak.pb.riak_pb2.RpbModFun
-        :rtype riak.pb.riak_pb2.RpbModFun
+        :type msg: kvhosting.pb.riak_pb2.RpbModFun
+        :rtype kvhosting.pb.riak_pb2.RpbModFun
         """
         if msg is None:
-            msg = riak.pb.riak_pb2.RpbModFun()
+            msg = kvhosting.pb.riak_pb2.RpbModFun()
         msg.module = str_to_bytes(props['mod'])
         msg.function = str_to_bytes(props['fun'])
         return msg
@@ -401,7 +401,7 @@ class PbufCodec(Codec):
         bucket properties.
 
         :param hook: the hook to decode
-        :type hook: riak.pb.riak_pb2.RpbCommitHook
+        :type hook: kvhosting.pb.riak_pb2.RpbCommitHook
         :rtype dict
         """
         if hook.HasField('modfun'):
@@ -417,8 +417,8 @@ class PbufCodec(Codec):
         :param hook: the hook to encode
         :type hook: dict
         :param msg: the protobuf message to fill
-        :type msg: riak.pb.riak_pb2.RpbCommitHook
-        :rtype riak.pb.riak_pb2.RpbCommitHook
+        :type msg: kvhosting.pb.riak_pb2.RpbCommitHook
+        :rtype kvhosting.pb.riak_pb2.RpbCommitHook
         """
         if 'name' in hook:
             msg.name = str_to_bytes(hook['name'])
@@ -454,18 +454,18 @@ class PbufCodec(Codec):
         :type term_regex: string
         :param streaming: encode as streaming request
         :type streaming: bool
-        :rtype riak.pb.riak_kv_pb2.RpbIndexReq
+        :rtype kvhosting.pb.riak_kv_pb2.RpbIndexReq
         """
-        req = riak.pb.riak_kv_pb2.RpbIndexReq(
+        req = kvhosting.pb.riak_kv_pb2.RpbIndexReq(
             bucket=str_to_bytes(bucket.name),
             index=str_to_bytes(index))
         self._add_bucket_type(req, bucket.bucket_type)
         if endkey is not None:
-            req.qtype = riak.pb.riak_kv_pb2.RpbIndexReq.range
+            req.qtype = kvhosting.pb.riak_kv_pb2.RpbIndexReq.range
             req.range_min = str_to_bytes(str(startkey))
             req.range_max = str_to_bytes(str(endkey))
         else:
-            req.qtype = riak.pb.riak_kv_pb2.RpbIndexReq.eq
+            req.qtype = kvhosting.pb.riak_kv_pb2.RpbIndexReq.eq
             req.key = str_to_bytes(str(startkey))
         if return_terms is not None:
             req.return_terms = return_terms
@@ -481,8 +481,8 @@ class PbufCodec(Codec):
         if term_regex:
             req.term_regex = str_to_bytes(term_regex)
         req.stream = streaming
-        mc = riak.pb.messages.MSG_CODE_INDEX_REQ
-        rc = riak.pb.messages.MSG_CODE_INDEX_RESP
+        mc = kvhosting.pb.messages.MSG_CODE_INDEX_REQ
+        rc = kvhosting.pb.messages.MSG_CODE_INDEX_RESP
         return Msg(mc, req.SerializeToString(), rc)
 
     def decode_index_req(self, resp, index,
@@ -506,7 +506,7 @@ class PbufCodec(Codec):
         Fills an RpbYokozunaIndex message with the appropriate data.
 
         :param index: a yz index message
-        :type index: riak.pb.riak_yokozuna_pb2.RpbYokozunaIndex
+        :type index: kvhosting.pb.riak_yokozuna_pb2.RpbYokozunaIndex
         :rtype dict
         """
         result = {}
@@ -675,9 +675,9 @@ class PbufCodec(Codec):
             msg.register_op = str_to_bytes(op[1])
         elif dtype == 'flag':
             if op == 'enable':
-                msg.flag_op = riak.pb.riak_dt_pb2.MapUpdate.ENABLE
+                msg.flag_op = kvhosting.pb.riak_dt_pb2.MapUpdate.ENABLE
             else:
-                msg.flag_op = riak.pb.riak_dt_pb2.MapUpdate.DISABLE
+                msg.flag_op = kvhosting.pb.riak_dt_pb2.MapUpdate.DISABLE
         else:
             raise ValueError(
                 'Map may not contain datatype: {}'
@@ -711,13 +711,13 @@ class PbufCodec(Codec):
         else:
             raise ValueError("key must be a list")
 
-        req = riak.pb.riak_ts_pb2.TsGetReq()
-        mc = riak.pb.messages.MSG_CODE_TS_GET_REQ
-        rc = riak.pb.messages.MSG_CODE_TS_GET_RESP
+        req = kvhosting.pb.riak_ts_pb2.TsGetReq()
+        mc = kvhosting.pb.messages.MSG_CODE_TS_GET_REQ
+        rc = kvhosting.pb.messages.MSG_CODE_TS_GET_RESP
         if is_delete:
-            req = riak.pb.riak_ts_pb2.TsDelReq()
-            mc = riak.pb.messages.MSG_CODE_TS_DEL_REQ
-            rc = riak.pb.messages.MSG_CODE_TS_DEL_RESP
+            req = kvhosting.pb.riak_ts_pb2.TsDelReq()
+            mc = kvhosting.pb.messages.MSG_CODE_TS_DEL_REQ
+            rc = kvhosting.pb.messages.MSG_CODE_TS_DEL_RESP
 
         req.table = str_to_bytes(table.name)
         for cell in key_vals:
@@ -726,12 +726,12 @@ class PbufCodec(Codec):
         return Msg(mc, req.SerializeToString(), rc)
 
     def encode_timeseries_listkeysreq(self, table, timeout=None):
-        req = riak.pb.riak_ts_pb2.TsListKeysReq()
+        req = kvhosting.pb.riak_ts_pb2.TsListKeysReq()
         req.table = str_to_bytes(table.name)
         if self._client_timeouts and timeout:
             req.timeout = timeout
-        mc = riak.pb.messages.MSG_CODE_TS_LIST_KEYS_REQ
-        rc = riak.pb.messages.MSG_CODE_TS_LIST_KEYS_RESP
+        mc = kvhosting.pb.messages.MSG_CODE_TS_LIST_KEYS_REQ
+        rc = kvhosting.pb.messages.MSG_CODE_TS_LIST_KEYS_RESP
         return Msg(mc, req.SerializeToString(), rc)
 
     def validate_timeseries_put_resp(self, resp_code, resp):
@@ -748,9 +748,9 @@ class PbufCodec(Codec):
         :param tsobj: a TsObject
         :type tsobj: TsObject
         :param req: the protobuf message to fill
-        :type req: riak.pb.riak_ts_pb2.TsPutReq
+        :type req: kvhosting.pb.riak_ts_pb2.TsPutReq
         """
-        req = riak.pb.riak_ts_pb2.TsPutReq()
+        req = kvhosting.pb.riak_ts_pb2.TsPutReq()
         req.table = str_to_bytes(tsobj.table.name)
 
         if tsobj.columns:
@@ -767,18 +767,18 @@ class PbufCodec(Codec):
         else:
             raise RiakError("TsObject requires a list of rows")
 
-        mc = riak.pb.messages.MSG_CODE_TS_PUT_REQ
-        rc = riak.pb.messages.MSG_CODE_TS_PUT_RESP
+        mc = kvhosting.pb.messages.MSG_CODE_TS_PUT_REQ
+        rc = kvhosting.pb.messages.MSG_CODE_TS_PUT_RESP
         return Msg(mc, req.SerializeToString(), rc)
 
     def encode_timeseries_query(self, table, query, interpolations=None):
-        req = riak.pb.riak_ts_pb2.TsQueryReq()
+        req = kvhosting.pb.riak_ts_pb2.TsQueryReq()
         q = query
         if '{table}' in q:
             q = q.format(table=table.name)
         req.query.base = str_to_bytes(q)
-        mc = riak.pb.messages.MSG_CODE_TS_QUERY_REQ
-        rc = riak.pb.messages.MSG_CODE_TS_QUERY_RESP
+        mc = kvhosting.pb.messages.MSG_CODE_TS_QUERY_REQ
+        rc = kvhosting.pb.messages.MSG_CODE_TS_QUERY_RESP
         return Msg(mc, req.SerializeToString(), rc)
 
     def decode_timeseries(self, resp, tsobj,
@@ -788,8 +788,8 @@ class PbufCodec(Codec):
         metadata from a TsGetResp / TsQueryResp.
 
         :param resp: the protobuf message from which to process data
-        :type resp: riak.pb.riak_ts_pb2.TsQueryRsp or
-                    riak.pb.riak_ts_pb2.TsGetResp
+        :type resp: kvhosting.pb.riak_ts_pb2.TsQueryRsp or
+                    kvhosting.pb.riak_ts_pb2.TsGetResp
         :param tsobj: a TsObject
         :type tsobj: TsObject
         :param convert_timestamp: Convert timestamps to datetime objects
@@ -833,7 +833,7 @@ class PbufCodec(Codec):
         Decodes a TsRow into a list
 
         :param tsrow: the protobuf TsRow to decode.
-        :type tsrow: riak.pb.riak_ts_pb2.TsRow
+        :type tsrow: kvhosting.pb.riak_ts_pb2.TsRow
         :param tscols: the protobuf TsColumn data to help decode.
         :type tscols: list
         :rtype list
@@ -882,7 +882,7 @@ class PbufCodec(Codec):
 
         :param preflist: a bucket/key preflist
         :type preflist: list of
-                        riak.pb.riak_kv_pb2.RpbBucketKeyPreflistItem
+                        kvhosting.pb.riak_kv_pb2.RpbBucketKeyPreflistItem
         :rtype dict
         """
         result = {'partition': item.partition,
@@ -893,7 +893,7 @@ class PbufCodec(Codec):
     def encode_get(self, robj, r=None, pr=None, timeout=None,
                    basic_quorum=None, notfound_ok=None):
         bucket = robj.bucket
-        req = riak.pb.riak_kv_pb2.RpbGetReq()
+        req = kvhosting.pb.riak_kv_pb2.RpbGetReq()
         if r:
             req.r = self.encode_quorum(r)
         if self._quorum_controls:
@@ -910,15 +910,15 @@ class PbufCodec(Codec):
         req.bucket = str_to_bytes(bucket.name)
         self._add_bucket_type(req, bucket.bucket_type)
         req.key = str_to_bytes(robj.key)
-        mc = riak.pb.messages.MSG_CODE_GET_REQ
-        rc = riak.pb.messages.MSG_CODE_GET_RESP
+        mc = kvhosting.pb.messages.MSG_CODE_GET_REQ
+        rc = kvhosting.pb.messages.MSG_CODE_GET_RESP
         return Msg(mc, req.SerializeToString(), rc)
 
     def encode_put(self, robj, w=None, dw=None, pw=None,
                    return_body=True, if_none_match=False,
                    timeout=None):
         bucket = robj.bucket
-        req = riak.pb.riak_kv_pb2.RpbPutReq()
+        req = kvhosting.pb.riak_kv_pb2.RpbPutReq()
         if w:
             req.w = self.encode_quorum(w)
         if dw:
@@ -938,8 +938,8 @@ class PbufCodec(Codec):
         if robj.vclock:
             req.vclock = robj.vclock.encode('binary')
         self.encode_content(robj, req.content)
-        mc = riak.pb.messages.MSG_CODE_PUT_REQ
-        rc = riak.pb.messages.MSG_CODE_PUT_RESP
+        mc = kvhosting.pb.messages.MSG_CODE_PUT_REQ
+        rc = kvhosting.pb.messages.MSG_CODE_PUT_RESP
         return Msg(mc, req.SerializeToString(), rc)
 
     def decode_get(self, robj, resp):
@@ -970,7 +970,7 @@ class PbufCodec(Codec):
     def encode_delete(self, robj, rw=None, r=None,
                       w=None, dw=None, pr=None, pw=None,
                       timeout=None):
-        req = riak.pb.riak_kv_pb2.RpbDelReq()
+        req = kvhosting.pb.riak_kv_pb2.RpbDelReq()
         if rw:
             req.rw = self.encode_quorum(rw)
         if r:
@@ -998,18 +998,18 @@ class PbufCodec(Codec):
         req.bucket = str_to_bytes(bucket.name)
         self._add_bucket_type(req, bucket.bucket_type)
         req.key = str_to_bytes(robj.key)
-        mc = riak.pb.messages.MSG_CODE_DEL_REQ
-        rc = riak.pb.messages.MSG_CODE_DEL_RESP
+        mc = kvhosting.pb.messages.MSG_CODE_DEL_REQ
+        rc = kvhosting.pb.messages.MSG_CODE_DEL_RESP
         return Msg(mc, req.SerializeToString(), rc)
 
     def encode_stream_keys(self, bucket, timeout=None):
-        req = riak.pb.riak_kv_pb2.RpbListKeysReq()
+        req = kvhosting.pb.riak_kv_pb2.RpbListKeysReq()
         req.bucket = str_to_bytes(bucket.name)
         if self._client_timeouts and timeout:
             req.timeout = timeout
         self._add_bucket_type(req, bucket.bucket_type)
-        mc = riak.pb.messages.MSG_CODE_LIST_KEYS_REQ
-        rc = riak.pb.messages.MSG_CODE_LIST_KEYS_RESP
+        mc = kvhosting.pb.messages.MSG_CODE_LIST_KEYS_REQ
+        rc = kvhosting.pb.messages.MSG_CODE_LIST_KEYS_RESP
         return Msg(mc, req.SerializeToString(), rc)
 
     def decode_get_keys(self, stream):
@@ -1024,131 +1024,131 @@ class PbufCodec(Codec):
                 'server_version': bytes_to_str(resp.server_version)}
 
     def encode_get_client_id(self):
-        mc = riak.pb.messages.MSG_CODE_GET_CLIENT_ID_REQ
-        rc = riak.pb.messages.MSG_CODE_GET_CLIENT_ID_RESP
+        mc = kvhosting.pb.messages.MSG_CODE_GET_CLIENT_ID_REQ
+        rc = kvhosting.pb.messages.MSG_CODE_GET_CLIENT_ID_RESP
         return Msg(mc, None, rc)
 
     def decode_get_client_id(self, resp):
         return bytes_to_str(resp.client_id)
 
     def encode_set_client_id(self, client_id):
-        req = riak.pb.riak_kv_pb2.RpbSetClientIdReq()
+        req = kvhosting.pb.riak_kv_pb2.RpbSetClientIdReq()
         req.client_id = str_to_bytes(client_id)
-        mc = riak.pb.messages.MSG_CODE_SET_CLIENT_ID_REQ
-        rc = riak.pb.messages.MSG_CODE_SET_CLIENT_ID_RESP
+        mc = kvhosting.pb.messages.MSG_CODE_SET_CLIENT_ID_REQ
+        rc = kvhosting.pb.messages.MSG_CODE_SET_CLIENT_ID_RESP
         return Msg(mc, req.SerializeToString(), rc)
 
     def encode_get_buckets(self, bucket_type,
                            timeout=None, streaming=False):
         # Bucket streaming landed in the same release as timeouts, so
         # we don't need to check the capability.
-        req = riak.pb.riak_kv_pb2.RpbListBucketsReq()
+        req = kvhosting.pb.riak_kv_pb2.RpbListBucketsReq()
         req.stream = streaming
         self._add_bucket_type(req, bucket_type)
         if self._client_timeouts and timeout:
             req.timeout = timeout
-        mc = riak.pb.messages.MSG_CODE_LIST_BUCKETS_REQ
-        rc = riak.pb.messages.MSG_CODE_LIST_BUCKETS_RESP
+        mc = kvhosting.pb.messages.MSG_CODE_LIST_BUCKETS_REQ
+        rc = kvhosting.pb.messages.MSG_CODE_LIST_BUCKETS_RESP
         return Msg(mc, req.SerializeToString(), rc)
 
     def encode_get_bucket_props(self, bucket):
-        req = riak.pb.riak_pb2.RpbGetBucketReq()
+        req = kvhosting.pb.riak_pb2.RpbGetBucketReq()
         req.bucket = str_to_bytes(bucket.name)
         self._add_bucket_type(req, bucket.bucket_type)
-        mc = riak.pb.messages.MSG_CODE_GET_BUCKET_REQ
-        rc = riak.pb.messages.MSG_CODE_GET_BUCKET_RESP
+        mc = kvhosting.pb.messages.MSG_CODE_GET_BUCKET_REQ
+        rc = kvhosting.pb.messages.MSG_CODE_GET_BUCKET_RESP
         return Msg(mc, req.SerializeToString(), rc)
 
     def encode_set_bucket_props(self, bucket, props):
-        req = riak.pb.riak_pb2.RpbSetBucketReq()
+        req = kvhosting.pb.riak_pb2.RpbSetBucketReq()
         req.bucket = str_to_bytes(bucket.name)
         self._add_bucket_type(req, bucket.bucket_type)
         self.encode_bucket_props(props, req)
-        mc = riak.pb.messages.MSG_CODE_SET_BUCKET_REQ
-        rc = riak.pb.messages.MSG_CODE_SET_BUCKET_RESP
+        mc = kvhosting.pb.messages.MSG_CODE_SET_BUCKET_REQ
+        rc = kvhosting.pb.messages.MSG_CODE_SET_BUCKET_RESP
         return Msg(mc, req.SerializeToString(), rc)
 
     def encode_clear_bucket_props(self, bucket):
-        req = riak.pb.riak_pb2.RpbResetBucketReq()
+        req = kvhosting.pb.riak_pb2.RpbResetBucketReq()
         req.bucket = str_to_bytes(bucket.name)
         self._add_bucket_type(req, bucket.bucket_type)
-        mc = riak.pb.messages.MSG_CODE_RESET_BUCKET_REQ
-        rc = riak.pb.messages.MSG_CODE_RESET_BUCKET_RESP
+        mc = kvhosting.pb.messages.MSG_CODE_RESET_BUCKET_REQ
+        rc = kvhosting.pb.messages.MSG_CODE_RESET_BUCKET_RESP
         return Msg(mc, req.SerializeToString(), rc)
 
     def encode_get_bucket_type_props(self, bucket_type):
-        req = riak.pb.riak_pb2.RpbGetBucketTypeReq()
+        req = kvhosting.pb.riak_pb2.RpbGetBucketTypeReq()
         req.type = str_to_bytes(bucket_type.name)
-        mc = riak.pb.messages.MSG_CODE_GET_BUCKET_TYPE_REQ
-        rc = riak.pb.messages.MSG_CODE_GET_BUCKET_RESP
+        mc = kvhosting.pb.messages.MSG_CODE_GET_BUCKET_TYPE_REQ
+        rc = kvhosting.pb.messages.MSG_CODE_GET_BUCKET_RESP
         return Msg(mc, req.SerializeToString(), rc)
 
     def encode_set_bucket_type_props(self, bucket_type, props):
-        req = riak.pb.riak_pb2.RpbSetBucketTypeReq()
+        req = kvhosting.pb.riak_pb2.RpbSetBucketTypeReq()
         req.type = str_to_bytes(bucket_type.name)
         self.encode_bucket_props(props, req)
-        mc = riak.pb.messages.MSG_CODE_SET_BUCKET_TYPE_REQ
-        rc = riak.pb.messages.MSG_CODE_SET_BUCKET_RESP
+        mc = kvhosting.pb.messages.MSG_CODE_SET_BUCKET_TYPE_REQ
+        rc = kvhosting.pb.messages.MSG_CODE_SET_BUCKET_RESP
         return Msg(mc, req.SerializeToString(), rc)
 
     def encode_stream_mapred(self, content):
-        req = riak.pb.riak_kv_pb2.RpbMapRedReq()
+        req = kvhosting.pb.riak_kv_pb2.RpbMapRedReq()
         req.request = str_to_bytes(content)
         req.content_type = str_to_bytes("application/json")
-        mc = riak.pb.messages.MSG_CODE_MAP_RED_REQ
-        rc = riak.pb.messages.MSG_CODE_MAP_RED_RESP
+        mc = kvhosting.pb.messages.MSG_CODE_MAP_RED_REQ
+        rc = kvhosting.pb.messages.MSG_CODE_MAP_RED_RESP
         return Msg(mc, req.SerializeToString(), rc)
 
     def encode_create_search_index(self, index, schema=None,
                                    n_val=None, timeout=None):
         index = str_to_bytes(index)
-        idx = riak.pb.riak_yokozuna_pb2.RpbYokozunaIndex(name=index)
+        idx = kvhosting.pb.riak_yokozuna_pb2.RpbYokozunaIndex(name=index)
         if schema:
             idx.schema = str_to_bytes(schema)
         if n_val:
             idx.n_val = n_val
-        req = riak.pb.riak_yokozuna_pb2.RpbYokozunaIndexPutReq(index=idx)
+        req = kvhosting.pb.riak_yokozuna_pb2.RpbYokozunaIndexPutReq(index=idx)
         if timeout is not None:
             req.timeout = timeout
-        mc = riak.pb.messages.MSG_CODE_YOKOZUNA_INDEX_PUT_REQ
-        rc = riak.pb.messages.MSG_CODE_PUT_RESP
+        mc = kvhosting.pb.messages.MSG_CODE_YOKOZUNA_INDEX_PUT_REQ
+        rc = kvhosting.pb.messages.MSG_CODE_PUT_RESP
         return Msg(mc, req.SerializeToString(), rc)
 
     def encode_get_search_index(self, index):
-        req = riak.pb.riak_yokozuna_pb2.RpbYokozunaIndexGetReq(
+        req = kvhosting.pb.riak_yokozuna_pb2.RpbYokozunaIndexGetReq(
                 name=str_to_bytes(index))
-        mc = riak.pb.messages.MSG_CODE_YOKOZUNA_INDEX_GET_REQ
-        rc = riak.pb.messages.MSG_CODE_YOKOZUNA_INDEX_GET_RESP
+        mc = kvhosting.pb.messages.MSG_CODE_YOKOZUNA_INDEX_GET_REQ
+        rc = kvhosting.pb.messages.MSG_CODE_YOKOZUNA_INDEX_GET_RESP
         return Msg(mc, req.SerializeToString(), rc)
 
     def encode_list_search_indexes(self):
-        req = riak.pb.riak_yokozuna_pb2.RpbYokozunaIndexGetReq()
-        mc = riak.pb.messages.MSG_CODE_YOKOZUNA_INDEX_GET_REQ
-        rc = riak.pb.messages.MSG_CODE_YOKOZUNA_INDEX_GET_RESP
+        req = kvhosting.pb.riak_yokozuna_pb2.RpbYokozunaIndexGetReq()
+        mc = kvhosting.pb.messages.MSG_CODE_YOKOZUNA_INDEX_GET_REQ
+        rc = kvhosting.pb.messages.MSG_CODE_YOKOZUNA_INDEX_GET_RESP
         return Msg(mc, req.SerializeToString(), rc)
 
     def encode_delete_search_index(self, index):
-        req = riak.pb.riak_yokozuna_pb2.RpbYokozunaIndexDeleteReq(
+        req = kvhosting.pb.riak_yokozuna_pb2.RpbYokozunaIndexDeleteReq(
                 name=str_to_bytes(index))
-        mc = riak.pb.messages.MSG_CODE_YOKOZUNA_INDEX_DELETE_REQ
-        rc = riak.pb.messages.MSG_CODE_DEL_RESP
+        mc = kvhosting.pb.messages.MSG_CODE_YOKOZUNA_INDEX_DELETE_REQ
+        rc = kvhosting.pb.messages.MSG_CODE_DEL_RESP
         return Msg(mc, req.SerializeToString(), rc)
 
     def encode_create_search_schema(self, schema, content):
-        scma = riak.pb.riak_yokozuna_pb2.RpbYokozunaSchema(
+        scma = kvhosting.pb.riak_yokozuna_pb2.RpbYokozunaSchema(
                 name=str_to_bytes(schema),
                 content=str_to_bytes(content))
-        req = riak.pb.riak_yokozuna_pb2.RpbYokozunaSchemaPutReq(
+        req = kvhosting.pb.riak_yokozuna_pb2.RpbYokozunaSchemaPutReq(
                 schema=scma)
-        mc = riak.pb.messages.MSG_CODE_YOKOZUNA_SCHEMA_PUT_REQ
-        rc = riak.pb.messages.MSG_CODE_PUT_RESP
+        mc = kvhosting.pb.messages.MSG_CODE_YOKOZUNA_SCHEMA_PUT_REQ
+        rc = kvhosting.pb.messages.MSG_CODE_PUT_RESP
         return Msg(mc, req.SerializeToString(), rc)
 
     def encode_get_search_schema(self, schema):
-        req = riak.pb.riak_yokozuna_pb2.RpbYokozunaSchemaGetReq(
+        req = kvhosting.pb.riak_yokozuna_pb2.RpbYokozunaSchemaGetReq(
                 name=str_to_bytes(schema))
-        mc = riak.pb.messages.MSG_CODE_YOKOZUNA_SCHEMA_GET_REQ
-        rc = riak.pb.messages.MSG_CODE_YOKOZUNA_SCHEMA_GET_RESP
+        mc = kvhosting.pb.messages.MSG_CODE_YOKOZUNA_SCHEMA_GET_REQ
+        rc = kvhosting.pb.messages.MSG_CODE_YOKOZUNA_SCHEMA_GET_RESP
         return Msg(mc, req.SerializeToString(), rc)
 
     def decode_get_search_schema(self, resp):
@@ -1158,12 +1158,12 @@ class PbufCodec(Codec):
         return result
 
     def encode_search(self, index, query, **kwargs):
-        req = riak.pb.riak_search_pb2.RpbSearchQueryReq(
+        req = kvhosting.pb.riak_search_pb2.RpbSearchQueryReq(
                 index=str_to_bytes(index),
                 q=str_to_bytes(query))
         self.encode_search_query(req, **kwargs)
-        mc = riak.pb.messages.MSG_CODE_SEARCH_QUERY_REQ
-        rc = riak.pb.messages.MSG_CODE_SEARCH_QUERY_RESP
+        mc = kvhosting.pb.messages.MSG_CODE_SEARCH_QUERY_REQ
+        rc = kvhosting.pb.messages.MSG_CODE_SEARCH_QUERY_RESP
         return Msg(mc, req.SerializeToString(), rc)
 
     def decode_search(self, resp):
@@ -1176,7 +1176,7 @@ class PbufCodec(Codec):
         return result
 
     def encode_get_counter(self, bucket, key, **kwargs):
-        req = riak.pb.riak_kv_pb2.RpbCounterGetReq()
+        req = kvhosting.pb.riak_kv_pb2.RpbCounterGetReq()
         req.bucket = str_to_bytes(bucket.name)
         req.key = str_to_bytes(key)
         if kwargs.get('r') is not None:
@@ -1187,12 +1187,12 @@ class PbufCodec(Codec):
             req.basic_quorum = kwargs['basic_quorum']
         if kwargs.get('notfound_ok') is not None:
             req.notfound_ok = kwargs['notfound_ok']
-        mc = riak.pb.messages.MSG_CODE_COUNTER_GET_REQ
-        rc = riak.pb.messages.MSG_CODE_COUNTER_GET_RESP
+        mc = kvhosting.pb.messages.MSG_CODE_COUNTER_GET_REQ
+        rc = kvhosting.pb.messages.MSG_CODE_COUNTER_GET_RESP
         return Msg(mc, req.SerializeToString(), rc)
 
     def encode_update_counter(self, bucket, key, value, **kwargs):
-        req = riak.pb.riak_kv_pb2.RpbCounterUpdateReq()
+        req = kvhosting.pb.riak_kv_pb2.RpbCounterUpdateReq()
         req.bucket = str_to_bytes(bucket.name)
         req.key = str_to_bytes(key)
         req.amount = value
@@ -1204,18 +1204,18 @@ class PbufCodec(Codec):
             req.pw = self.encode_quorum(kwargs['pw'])
         if kwargs.get('returnvalue') is not None:
             req.returnvalue = kwargs['returnvalue']
-        mc = riak.pb.messages.MSG_CODE_COUNTER_UPDATE_REQ
-        rc = riak.pb.messages.MSG_CODE_COUNTER_UPDATE_RESP
+        mc = kvhosting.pb.messages.MSG_CODE_COUNTER_UPDATE_REQ
+        rc = kvhosting.pb.messages.MSG_CODE_COUNTER_UPDATE_RESP
         return Msg(mc, req.SerializeToString(), rc)
 
     def encode_fetch_datatype(self, bucket, key, **kwargs):
-        req = riak.pb.riak_dt_pb2.DtFetchReq()
+        req = kvhosting.pb.riak_dt_pb2.DtFetchReq()
         req.type = str_to_bytes(bucket.bucket_type.name)
         req.bucket = str_to_bytes(bucket.name)
         req.key = str_to_bytes(key)
         self.encode_dt_options(req, **kwargs)
-        mc = riak.pb.messages.MSG_CODE_DT_FETCH_REQ
-        rc = riak.pb.messages.MSG_CODE_DT_FETCH_RESP
+        mc = kvhosting.pb.messages.MSG_CODE_DT_FETCH_REQ
+        rc = kvhosting.pb.messages.MSG_CODE_DT_FETCH_RESP
         return Msg(mc, req.SerializeToString(), rc)
 
     def encode_update_datatype(self, datatype, **kwargs):
@@ -1224,7 +1224,7 @@ class PbufCodec(Codec):
         if not op:
             raise ValueError("No operation to send on datatype {!r}".
                              format(datatype))
-        req = riak.pb.riak_dt_pb2.DtUpdateReq()
+        req = kvhosting.pb.riak_dt_pb2.DtUpdateReq()
         req.bucket = str_to_bytes(datatype.bucket.name)
         req.type = str_to_bytes(datatype.bucket.bucket_type.name)
         if datatype.key:
@@ -1233,8 +1233,8 @@ class PbufCodec(Codec):
             req.context = datatype._context
         self.encode_dt_options(req, **kwargs)
         self.encode_dt_op(type_name, req, op)
-        mc = riak.pb.messages.MSG_CODE_DT_UPDATE_REQ
-        rc = riak.pb.messages.MSG_CODE_DT_UPDATE_RESP
+        mc = kvhosting.pb.messages.MSG_CODE_DT_UPDATE_REQ
+        rc = kvhosting.pb.messages.MSG_CODE_DT_UPDATE_RESP
         return Msg(mc, req.SerializeToString(), rc)
 
     def decode_update_datatype(self, datatype, resp, **kwargs):
@@ -1247,10 +1247,10 @@ class PbufCodec(Codec):
             datatype._set_value(self.decode_dt_value(type_name, resp))
 
     def encode_get_preflist(self, bucket, key):
-        req = riak.pb.riak_kv_pb2.RpbGetBucketKeyPreflistReq()
+        req = kvhosting.pb.riak_kv_pb2.RpbGetBucketKeyPreflistReq()
         req.bucket = str_to_bytes(bucket.name)
         req.key = str_to_bytes(key)
         req.type = str_to_bytes(bucket.bucket_type.name)
-        mc = riak.pb.messages.MSG_CODE_GET_BUCKET_KEY_PREFLIST_REQ
-        rc = riak.pb.messages.MSG_CODE_GET_BUCKET_KEY_PREFLIST_RESP
+        mc = kvhosting.pb.messages.MSG_CODE_GET_BUCKET_KEY_PREFLIST_REQ
+        rc = kvhosting.pb.messages.MSG_CODE_GET_BUCKET_KEY_PREFLIST_RESP
         return Msg(mc, req.SerializeToString(), rc)

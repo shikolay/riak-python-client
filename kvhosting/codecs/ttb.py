@@ -4,11 +4,11 @@ import six
 from erlastic import encode, decode
 from erlastic.types import Atom
 
-from riak import RiakError
-from riak.codecs import Codec, Msg
-from riak.pb.messages import MSG_CODE_TS_TTB_MSG
-from riak.ts_object import TsColumns
-from riak.util import bytes_to_str, unix_time_millis, \
+from kvhosting import RiakError
+from kvhosting.codecs import Codec, Msg
+from kvhosting.pb.messages import MSG_CODE_TS_TTB_MSG
+from kvhosting.ts_object import TsColumns
+from kvhosting.util import bytes_to_str, unix_time_millis, \
     datetime_from_unix_time_millis
 
 udef_a = Atom('undefined')

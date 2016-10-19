@@ -5,13 +5,13 @@ Riak objects, run Javascript (and Erlang) based Map/Reduce
 operations, and run Linkwalking operations.
 """
 
-from riak.riak_error import RiakError, ConflictError
-from riak.client import RiakClient
-from riak.bucket import RiakBucket, BucketType
-from riak.table import Table
-from riak.node import RiakNode
-from riak.riak_object import RiakObject
-from riak.mapreduce import RiakKeyFilter, RiakMapReduce, RiakLink
+from kvhosting.riak_error import RiakError, ConflictError
+from kvhosting.client import RiakClient
+from kvhosting.bucket import RiakBucket, BucketType
+from kvhosting.table import Table
+from kvhosting.node import RiakNode
+from kvhosting.riak_object import RiakObject
+from kvhosting.mapreduce import RiakKeyFilter, RiakMapReduce, RiakLink
 
 
 __all__ = ['RiakBucket', 'Table', 'BucketType', 'RiakNode',

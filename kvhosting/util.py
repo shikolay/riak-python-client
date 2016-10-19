@@ -12,7 +12,7 @@ try:
     import pytz
     epoch_tz = pytz.utc.localize(epoch)
 except ImportError:
-    from riak.tz import utc
+    from kvhosting.tz import utc
     epoch_tz = datetime.datetime.fromtimestamp(0, tz=utc)
 
 

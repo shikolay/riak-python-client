@@ -6,12 +6,12 @@ from cgi import parse_header
 from email import message_from_string
 from email.utils import parsedate_tz, mktime_tz
 from xml.etree import ElementTree
-from riak import RiakError
-from riak.content import RiakContent
-from riak.riak_object import VClock
-from riak.multidict import MultiDict
-from riak.transports.http.search import XMLSearchResult
-from riak.util import decode_index_value, bytes_to_str
+from kvhosting import RiakError
+from kvhosting.content import RiakContent
+from kvhosting.riak_object import VClock
+from kvhosting.multidict import MultiDict
+from kvhosting.transports.http.search import XMLSearchResult
+from kvhosting.util import decode_index_value, bytes_to_str
 
 if PY2:
     from urllib import unquote_plus

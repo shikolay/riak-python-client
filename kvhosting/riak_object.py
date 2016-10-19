@@ -1,8 +1,8 @@
-from riak import ConflictError
-from riak.content import RiakContent
+from kvhosting import ConflictError
+from kvhosting.content import RiakContent
 import base64
 from six import string_types, PY2
-from riak.mapreduce import RiakMapReduce
+from kvhosting.mapreduce import RiakMapReduce
 
 
 def content_property(name, doc=None):

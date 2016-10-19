@@ -3,16 +3,16 @@ import datetime
 import six
 import unittest
 
-import riak.pb.riak_ts_pb2
-from riak.pb.riak_ts_pb2 import TsColumnType
+import kvhosting.pb.riak_ts_pb2
+from kvhosting.pb.riak_ts_pb2 import TsColumnType
 
-from riak import RiakError
-from riak.codecs.pbuf import PbufCodec
-from riak.table import Table
-from riak.tests import RUN_TIMESERIES
-from riak.tests.base import IntegrationTestBase
-from riak.ts_object import TsObject
-from riak.util import str_to_bytes, bytes_to_str, \
+from kvhosting import RiakError
+from kvhosting.codecs.pbuf import PbufCodec
+from kvhosting.table import Table
+from kvhosting.tests import RUN_TIMESERIES
+from kvhosting.tests.base import IntegrationTestBase
+from kvhosting.ts_object import TsObject
+from kvhosting.util import str_to_bytes, bytes_to_str, \
     unix_time_millis, datetime_from_unix_time_millis, \
     is_timeseries_supported
 

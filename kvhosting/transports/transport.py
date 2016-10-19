@@ -6,7 +6,7 @@ import json
 import platform
 
 from six import PY2
-from riak.transports.feature_detect import FeatureDetection
+from kvhosting.transports.feature_detect import FeatureDetection
 
 
 class Transport(FeatureDetection):

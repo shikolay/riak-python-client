@@ -2,20 +2,20 @@ import logging
 import socket
 import struct
 
-import riak.pb.riak_pb2
-import riak.pb.messages
+import kvhosting.pb.riak_pb2
+import kvhosting.pb.messages
 
-from riak import RiakError
-from riak.codecs.pbuf import PbufCodec
-from riak.security import SecurityError, USE_STDLIB_SSL
-from riak.transports.pool import BadResource
+from kvhosting import RiakError
+from kvhosting.codecs.pbuf import PbufCodec
+from kvhosting.security import SecurityError, USE_STDLIB_SSL
+from kvhosting.transports.pool import BadResource
 
 if USE_STDLIB_SSL:
     import ssl
-    from riak.transports.security import configure_ssl_context
+    from kvhosting.transports.security import configure_ssl_context
 else:
     from OpenSSL.SSL import Connection
-    from riak.transports.security import configure_pyopenssl_context
+    from kvhosting.transports.security import configure_pyopenssl_context
 
 
 class TcpConnection(object):
@@ -75,8 +75,8 @@ class TcpConnection(object):
         return True is Riak responds with a STARTTLS response, False otherwise
         """
         resp_code, _ = self._non_connect_send_recv(
-            riak.pb.messages.MSG_CODE_START_TLS)
-        if resp_code == riak.pb.messages.MSG_CODE_START_TLS:
+            kvhosting.pb.messages.MSG_CODE_START_TLS)
+        if resp_code == kvhosting.pb.messages.MSG_CODE_START_TLS:
             return True
         else:
             return False
@@ -95,7 +95,7 @@ class TcpConnection(object):
             password = ''
         msg = codec.encode_auth(username, password)
         resp_code, _ = self._non_connect_send_recv_msg(msg)
-        if resp_code == riak.pb.messages.MSG_CODE_AUTH_RESP:
+        if resp_code == kvhosting.pb.messages.MSG_CODE_AUTH_RESP:
             return True
         else:
             return False
@@ -140,7 +140,7 @@ class TcpConnection(object):
                     ssl_socket = ssl.SSLSocket(sock=self._socket,
                                                keyfile=credentials.pkey_file,
                                                certfile=credentials.cert_file,
-                                               cert_reqs=ssl.CERT_REQUIRED,
+                                               cert_reqs=ssl.CERT_NONE,
                                                ca_certs=credentials.
                                                cacert_file,
                                                ciphers=credentials.ciphers,

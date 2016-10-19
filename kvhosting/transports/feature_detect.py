@@ -1,5 +1,5 @@
 from distutils.version import LooseVersion
-from riak.util import lazy_property
+from kvhosting.util import lazy_property
 
 
 versions = {

@@ -18,8 +18,8 @@ under the License.
 
 import ssl
 import warnings
-from riak import RiakError
-from riak.util import str_to_long
+from kvhosting import RiakError
+from kvhosting.util import str_to_long
 
 if hasattr(ssl, 'SSLContext'):
     # For Python >= 2.7.9 and Python 3.x

@@ -1,4 +1,4 @@
-from riak import RiakError
+from kvhosting import RiakError
 
 
 class ContextRequired(RiakError):

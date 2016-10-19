@@ -17,9 +17,9 @@ under the License.
 """
 
 from collections import Sized
-from riak.datatypes.datatype import Datatype
+from kvhosting.datatypes.datatype import Datatype
 from six import string_types
-from riak.datatypes import TYPES
+from kvhosting.datatypes import TYPES
 
 
 class Register(Sized, Datatype):

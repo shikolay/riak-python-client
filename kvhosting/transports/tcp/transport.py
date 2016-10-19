@@ -1,17 +1,17 @@
 import six
 
-import riak.pb.messages
+import kvhosting.pb.messages
 
-from riak import RiakError
-from riak.codecs import Codec, Msg
-from riak.codecs.pbuf import PbufCodec
-from riak.codecs.ttb import TtbCodec
-from riak.pb.messages import MSG_CODE_TS_TTB_MSG
-from riak.transports.transport import Transport
-from riak.ts_object import TsObject
+from kvhosting import RiakError
+from kvhosting.codecs import Codec, Msg
+from kvhosting.codecs.pbuf import PbufCodec
+from kvhosting.codecs.ttb import TtbCodec
+from kvhosting.pb.messages import MSG_CODE_TS_TTB_MSG
+from kvhosting.transports.transport import Transport
+from kvhosting.ts_object import TsObject
 
-from riak.transports.tcp.connection import TcpConnection
-from riak.transports.tcp.stream import (PbufKeyStream,
+from kvhosting.transports.tcp.connection import TcpConnection
+from kvhosting.transports.tcp.stream import (PbufKeyStream,
                                         PbufMapredStream,
                                         PbufBucketStream,
                                         PbufIndexStream,
@@ -65,11 +65,11 @@ class TcpTransport(Transport, TcpConnection):
     def _get_codec(self, msg_code):
         if msg_code == MSG_CODE_TS_TTB_MSG:
             codec = self._get_ttb_codec()
-        elif msg_code == riak.pb.messages.MSG_CODE_TS_GET_REQ:
+        elif msg_code == kvhosting.pb.messages.MSG_CODE_TS_GET_REQ:
             codec = self._get_ttb_codec()
-        elif msg_code == riak.pb.messages.MSG_CODE_TS_PUT_REQ:
+        elif msg_code == kvhosting.pb.messages.MSG_CODE_TS_PUT_REQ:
             codec = self._get_ttb_codec()
-        elif msg_code == riak.pb.messages.MSG_CODE_TS_QUERY_REQ:
+        elif msg_code == kvhosting.pb.messages.MSG_CODE_TS_QUERY_REQ:
             codec = self._get_ttb_codec()
         else:
             codec = self._get_pbuf_codec()
@@ -93,11 +93,11 @@ class TcpTransport(Transport, TcpConnection):
         """
         Ping the remote server
         """
-        msg_code = riak.pb.messages.MSG_CODE_PING_REQ
+        msg_code = kvhosting.pb.messages.MSG_CODE_PING_REQ
         codec = self._get_codec(msg_code)
         msg = codec.encode_ping()
         resp_code, _ = self._request(msg, codec)
-        if resp_code == riak.pb.messages.MSG_CODE_PING_RESP:
+        if resp_code == kvhosting.pb.messages.MSG_CODE_PING_RESP:
             return True
         else:
             return False
@@ -109,20 +109,20 @@ class TcpTransport(Transport, TcpConnection):
         # NB: can't do it this way due to recursion
         # codec = self._get_codec(ttb_supported=False)
         codec = PbufCodec()
-        msg = Msg(riak.pb.messages.MSG_CODE_GET_SERVER_INFO_REQ, None,
-                  riak.pb.messages.MSG_CODE_GET_SERVER_INFO_RESP)
+        msg = Msg(kvhosting.pb.messages.MSG_CODE_GET_SERVER_INFO_REQ, None,
+                  kvhosting.pb.messages.MSG_CODE_GET_SERVER_INFO_RESP)
         resp_code, resp = self._request(msg, codec)
         return codec.decode_get_server_info(resp)
 
     def _get_client_id(self):
-        msg_code = riak.pb.messages.MSG_CODE_GET_CLIENT_ID_REQ
+        msg_code = kvhosting.pb.messages.MSG_CODE_GET_CLIENT_ID_REQ
         codec = self._get_codec(msg_code)
         msg = codec.encode_get_client_id()
         resp_code, resp = self._request(msg, codec)
         return codec.decode_get_client_id(resp)
 
     def _set_client_id(self, client_id):
-        msg_code = riak.pb.messages.MSG_CODE_SET_CLIENT_ID_REQ
+        msg_code = kvhosting.pb.messages.MSG_CODE_SET_CLIENT_ID_REQ
         codec = self._get_codec(msg_code)
         msg = codec.encode_set_client_id(client_id)
         resp_code, resp = self._request(msg, codec)
@@ -136,7 +136,7 @@ class TcpTransport(Transport, TcpConnection):
         """
         Serialize get request and deserialize response
         """
-        msg_code = riak.pb.messages.MSG_CODE_GET_REQ
+        msg_code = kvhosting.pb.messages.MSG_CODE_GET_REQ
         codec = self._get_codec(msg_code)
         msg = codec.encode_get(robj, r, pr,
                                timeout, basic_quorum,
@@ -146,7 +146,7 @@ class TcpTransport(Transport, TcpConnection):
 
     def put(self, robj, w=None, dw=None, pw=None, return_body=True,
             if_none_match=False, timeout=None):
-        msg_code = riak.pb.messages.MSG_CODE_PUT_REQ
+        msg_code = kvhosting.pb.messages.MSG_CODE_PUT_REQ
         codec = self._get_codec(msg_code)
         msg = codec.encode_put(robj, w, dw, pw, return_body,
                                if_none_match, timeout)
@@ -175,7 +175,7 @@ class TcpTransport(Transport, TcpConnection):
         return codec.validate_timeseries_put_resp(resp_code, resp)
 
     def ts_delete(self, table, key):
-        msg_code = riak.pb.messages.MSG_CODE_TS_DEL_REQ
+        msg_code = kvhosting.pb.messages.MSG_CODE_TS_DEL_REQ
         codec = self._get_codec(msg_code)
         msg = codec.encode_timeseries_keyreq(table, key, is_delete=True)
         resp_code, resp = self._request(msg, codec)
@@ -185,7 +185,7 @@ class TcpTransport(Transport, TcpConnection):
             raise RiakError("missing response object")
 
     def ts_query(self, table, query, interpolations=None):
-        msg_code = riak.pb.messages.MSG_CODE_TS_QUERY_REQ
+        msg_code = kvhosting.pb.messages.MSG_CODE_TS_QUERY_REQ
         codec = self._get_codec(msg_code)
         msg = codec.encode_timeseries_query(table, query, interpolations)
         resp_code, resp = self._request(msg, codec)
@@ -199,7 +199,7 @@ class TcpTransport(Transport, TcpConnection):
         Streams keys from a timeseries table, returning an iterator that
         yields lists of keys.
         """
-        msg_code = riak.pb.messages.MSG_CODE_TS_LIST_KEYS_REQ
+        msg_code = kvhosting.pb.messages.MSG_CODE_TS_LIST_KEYS_REQ
         codec = self._get_codec(msg_code)
         msg = codec.encode_timeseries_listkeysreq(table, timeout)
         self._send_msg(msg.msg_code, msg.data)
@@ -207,7 +207,7 @@ class TcpTransport(Transport, TcpConnection):
 
     def delete(self, robj, rw=None, r=None, w=None, dw=None,
                pr=None, pw=None, timeout=None):
-        msg_code = riak.pb.messages.MSG_CODE_DEL_REQ
+        msg_code = kvhosting.pb.messages.MSG_CODE_DEL_REQ
         codec = self._get_codec(msg_code)
         msg = codec.encode_delete(robj, rw, r, w, dw, pr, pw, timeout)
         resp_code, resp = self._request(msg, codec)
@@ -217,7 +217,7 @@ class TcpTransport(Transport, TcpConnection):
         """
         Lists all keys within a bucket.
         """
-        msg_code = riak.pb.messages.MSG_CODE_LIST_KEYS_REQ
+        msg_code = kvhosting.pb.messages.MSG_CODE_LIST_KEYS_REQ
         codec = self._get_codec(msg_code)
         stream = self.stream_keys(bucket, timeout=timeout)
         return codec.decode_get_keys(stream)
@@ -227,7 +227,7 @@ class TcpTransport(Transport, TcpConnection):
         Streams keys from a bucket, returning an iterator that yields
         lists of keys.
         """
-        msg_code = riak.pb.messages.MSG_CODE_LIST_KEYS_REQ
+        msg_code = kvhosting.pb.messages.MSG_CODE_LIST_KEYS_REQ
         codec = self._get_codec(msg_code)
         msg = codec.encode_stream_keys(bucket, timeout)
         self._send_msg(msg.msg_code, msg.data)
@@ -237,7 +237,7 @@ class TcpTransport(Transport, TcpConnection):
         """
         Serialize bucket listing request and deserialize response
         """
-        msg_code = riak.pb.messages.MSG_CODE_LIST_BUCKETS_REQ
+        msg_code = kvhosting.pb.messages.MSG_CODE_LIST_BUCKETS_REQ
         codec = self._get_codec(msg_code)
         msg = codec.encode_get_buckets(bucket_type,
                                        timeout, streaming=False)
@@ -251,7 +251,7 @@ class TcpTransport(Transport, TcpConnection):
         if not self.bucket_stream():
             raise NotImplementedError('Streaming list-buckets is not '
                                       'supported')
-        msg_code = riak.pb.messages.MSG_CODE_LIST_BUCKETS_REQ
+        msg_code = kvhosting.pb.messages.MSG_CODE_LIST_BUCKETS_REQ
         codec = self._get_codec(msg_code)
         msg = codec.encode_get_buckets(bucket_type,
                                        timeout, streaming=True)
@@ -262,7 +262,7 @@ class TcpTransport(Transport, TcpConnection):
         """
         Serialize bucket property request and deserialize response
         """
-        msg_code = riak.pb.messages.MSG_CODE_GET_BUCKET_REQ
+        msg_code = kvhosting.pb.messages.MSG_CODE_GET_BUCKET_REQ
         codec = self._get_codec(msg_code)
         msg = codec.encode_get_bucket_props(bucket)
         resp_code, resp = self._request(msg, codec)
@@ -277,7 +277,7 @@ class TcpTransport(Transport, TcpConnection):
                 if key not in ('n_val', 'allow_mult'):
                     raise NotImplementedError('Server only supports n_val and '
                                               'allow_mult properties over PBC')
-        msg_code = riak.pb.messages.MSG_CODE_SET_BUCKET_REQ
+        msg_code = kvhosting.pb.messages.MSG_CODE_SET_BUCKET_REQ
         codec = self._get_codec(msg_code)
         msg = codec.encode_set_bucket_props(bucket, props)
         resp_code, resp = self._request(msg, codec)
@@ -289,7 +289,7 @@ class TcpTransport(Transport, TcpConnection):
         """
         if not self.pb_clear_bucket_props():
             return False
-        msg_code = riak.pb.messages.MSG_CODE_RESET_BUCKET_REQ
+        msg_code = kvhosting.pb.messages.MSG_CODE_RESET_BUCKET_REQ
         codec = self._get_codec(msg_code)
         msg = codec.encode_clear_bucket_props(bucket)
         self._request(msg, codec)
@@ -300,7 +300,7 @@ class TcpTransport(Transport, TcpConnection):
         Fetch bucket-type properties
         """
         self._check_bucket_types(bucket_type)
-        msg_code = riak.pb.messages.MSG_CODE_GET_BUCKET_TYPE_REQ
+        msg_code = kvhosting.pb.messages.MSG_CODE_GET_BUCKET_TYPE_REQ
         codec = self._get_codec(msg_code)
         msg = codec.encode_get_bucket_type_props(bucket_type)
         resp_code, resp = self._request(msg, codec)
@@ -311,7 +311,7 @@ class TcpTransport(Transport, TcpConnection):
         Set bucket-type properties
         """
         self._check_bucket_types(bucket_type)
-        msg_code = riak.pb.messages.MSG_CODE_SET_BUCKET_TYPE_REQ
+        msg_code = kvhosting.pb.messages.MSG_CODE_SET_BUCKET_TYPE_REQ
         codec = self._get_codec(msg_code)
         msg = codec.encode_set_bucket_type_props(bucket_type, props)
         resp_code, resp = self._request(msg, codec)
@@ -337,7 +337,7 @@ class TcpTransport(Transport, TcpConnection):
 
     def stream_mapred(self, inputs, query, timeout=None):
         # Construct the job, optionally set the timeout...
-        msg_code = riak.pb.messages.MSG_CODE_MAP_RED_REQ
+        msg_code = kvhosting.pb.messages.MSG_CODE_MAP_RED_REQ
         codec = self._get_codec(msg_code)
         content = self._construct_mapred_json(inputs, query, timeout)
         msg = codec.encode_stream_mapred(content)
@@ -355,7 +355,7 @@ class TcpTransport(Transport, TcpConnection):
             raise NotImplementedError("Secondary index term_regex is not "
                                       "supported")
 
-        msg_code = riak.pb.messages.MSG_CODE_INDEX_REQ
+        msg_code = kvhosting.pb.messages.MSG_CODE_INDEX_REQ
         codec = self._get_codec(msg_code)
         msg = codec.encode_index_req(bucket, index, startkey, endkey,
                                      return_terms, max_results,
@@ -374,7 +374,7 @@ class TcpTransport(Transport, TcpConnection):
         if term_regex and not self.index_term_regex():
             raise NotImplementedError("Secondary index term_regex is not "
                                       "supported")
-        msg_code = riak.pb.messages.MSG_CODE_INDEX_REQ
+        msg_code = kvhosting.pb.messages.MSG_CODE_INDEX_REQ
         codec = self._get_codec(msg_code)
         msg = codec.encode_index_req(bucket, index, startkey, endkey,
                                      return_terms, max_results,
@@ -388,7 +388,7 @@ class TcpTransport(Transport, TcpConnection):
         if not self.pb_search_admin():
             raise NotImplementedError("Search 2.0 administration is not "
                                       "supported for this version")
-        msg_code = riak.pb.messages.MSG_CODE_YOKOZUNA_INDEX_PUT_REQ
+        msg_code = kvhosting.pb.messages.MSG_CODE_YOKOZUNA_INDEX_PUT_REQ
         codec = self._get_codec(msg_code)
         msg = codec.encode_create_search_index(index, schema, n_val, timeout)
         self._request(msg, codec)
@@ -398,7 +398,7 @@ class TcpTransport(Transport, TcpConnection):
         if not self.pb_search_admin():
             raise NotImplementedError("Search 2.0 administration is not "
                                       "supported for this version")
-        msg_code = riak.pb.messages.MSG_CODE_YOKOZUNA_INDEX_GET_REQ
+        msg_code = kvhosting.pb.messages.MSG_CODE_YOKOZUNA_INDEX_GET_REQ
         codec = self._get_codec(msg_code)
         msg = codec.encode_get_search_index(index)
         resp_code, resp = self._request(msg, codec)
@@ -411,7 +411,7 @@ class TcpTransport(Transport, TcpConnection):
         if not self.pb_search_admin():
             raise NotImplementedError("Search 2.0 administration is not "
                                       "supported for this version")
-        msg_code = riak.pb.messages.MSG_CODE_YOKOZUNA_INDEX_GET_REQ
+        msg_code = kvhosting.pb.messages.MSG_CODE_YOKOZUNA_INDEX_GET_REQ
         codec = self._get_codec(msg_code)
         msg = codec.encode_list_search_indexes()
         resp_code, resp = self._request(msg, codec)
@@ -421,7 +421,7 @@ class TcpTransport(Transport, TcpConnection):
         if not self.pb_search_admin():
             raise NotImplementedError("Search 2.0 administration is not "
                                       "supported for this version")
-        msg_code = riak.pb.messages.MSG_CODE_YOKOZUNA_INDEX_DELETE_REQ
+        msg_code = kvhosting.pb.messages.MSG_CODE_YOKOZUNA_INDEX_DELETE_REQ
         codec = self._get_codec(msg_code)
         msg = codec.encode_delete_search_index(index)
         self._request(msg, codec)
@@ -431,7 +431,7 @@ class TcpTransport(Transport, TcpConnection):
         if not self.pb_search_admin():
             raise NotImplementedError("Search 2.0 administration is not "
                                       "supported for this version")
-        msg_code = riak.pb.messages.MSG_CODE_YOKOZUNA_SCHEMA_PUT_REQ
+        msg_code = kvhosting.pb.messages.MSG_CODE_YOKOZUNA_SCHEMA_PUT_REQ
         codec = self._get_codec(msg_code)
         msg = codec.encode_create_search_schema(schema, content)
         self._request(msg, codec)
@@ -441,7 +441,7 @@ class TcpTransport(Transport, TcpConnection):
         if not self.pb_search_admin():
             raise NotImplementedError("Search 2.0 administration is not "
                                       "supported for this version")
-        msg_code = riak.pb.messages.MSG_CODE_YOKOZUNA_SCHEMA_GET_REQ
+        msg_code = kvhosting.pb.messages.MSG_CODE_YOKOZUNA_SCHEMA_GET_REQ
         codec = self._get_codec(msg_code)
         msg = codec.encode_get_search_schema(schema)
         resp_code, resp = self._request(msg, codec)
@@ -453,7 +453,7 @@ class TcpTransport(Transport, TcpConnection):
             return self._search_mapred_emu(index, query)
         if six.PY2 and isinstance(query, unicode):  # noqa
             query = query.encode('utf8')
-        msg_code = riak.pb.messages.MSG_CODE_SEARCH_QUERY_REQ
+        msg_code = kvhosting.pb.messages.MSG_CODE_SEARCH_QUERY_REQ
         codec = self._get_codec(msg_code)
         msg = codec.encode_search(index, query, **kwargs)
         resp_code, resp = self._request(msg, codec)
@@ -466,7 +466,7 @@ class TcpTransport(Transport, TcpConnection):
                                       "use datatypes instead.")
         if not self.counters():
             raise NotImplementedError("Counters are not supported")
-        msg_code = riak.pb.messages.MSG_CODE_COUNTER_GET_REQ
+        msg_code = kvhosting.pb.messages.MSG_CODE_COUNTER_GET_REQ
         codec = self._get_codec(msg_code)
         msg = codec.encode_get_counter(bucket, key, **kwargs)
         resp_code, resp = self._request(msg, codec)
@@ -482,7 +482,7 @@ class TcpTransport(Transport, TcpConnection):
                                       "use datatypes instead.")
         if not self.counters():
             raise NotImplementedError("Counters are not supported")
-        msg_code = riak.pb.messages.MSG_CODE_COUNTER_UPDATE_REQ
+        msg_code = kvhosting.pb.messages.MSG_CODE_COUNTER_UPDATE_REQ
         codec = self._get_codec(msg_code)
         msg = codec.encode_update_counter(bucket, key, value, **kwargs)
         resp_code, resp = self._request(msg, codec)
@@ -497,7 +497,7 @@ class TcpTransport(Transport, TcpConnection):
                                       " bucket-type.")
         if not self.datatypes():
             raise NotImplementedError("Datatypes are not supported.")
-        msg_code = riak.pb.messages.MSG_CODE_DT_FETCH_REQ
+        msg_code = kvhosting.pb.messages.MSG_CODE_DT_FETCH_REQ
         codec = self._get_codec(msg_code)
         msg = codec.encode_fetch_datatype(bucket, key, **kwargs)
         resp_code, resp = self._request(msg, codec)
@@ -509,7 +509,7 @@ class TcpTransport(Transport, TcpConnection):
                                       " bucket-type.")
         if not self.datatypes():
             raise NotImplementedError("Datatypes are not supported.")
-        msg_code = riak.pb.messages.MSG_CODE_DT_UPDATE_REQ
+        msg_code = kvhosting.pb.messages.MSG_CODE_DT_UPDATE_REQ
         codec = self._get_codec(msg_code)
         msg = codec.encode_update_datatype(datatype, **kwargs)
         resp_code, resp = self._request(msg, codec)
@@ -521,14 +521,14 @@ class TcpTransport(Transport, TcpConnection):
         Get the preflist for a bucket/key
 
         :param bucket: Riak Bucket
-        :type bucket: :class:`~riak.bucket.RiakBucket`
+        :type bucket: :class:`~kvhosting.bucket.RiakBucket`
         :param key: Riak Key
         :type key: string
         :rtype: list of dicts
         """
         if not self.preflists():
             raise NotImplementedError("fetching preflists is not supported.")
-        msg_code = riak.pb.messages.MSG_CODE_GET_BUCKET_KEY_PREFLIST_REQ
+        msg_code = kvhosting.pb.messages.MSG_CODE_GET_BUCKET_KEY_PREFLIST_REQ
         codec = self._get_codec(msg_code)
         msg = codec.encode_get_preflist(bucket, key)
         resp_code, resp = self._request(msg, codec)
@@ -550,7 +550,7 @@ class TcpTransport(Transport, TcpConnection):
         codec.maybe_riak_error(resp_code, data)
         codec.maybe_incorrect_code(resp_code, expect)
         if resp_code == MSG_CODE_TS_TTB_MSG or \
-           resp_code in riak.pb.messages.MESSAGE_CLASSES:
+           resp_code in kvhosting.pb.messages.MESSAGE_CLASSES:
             msg = codec.parse_msg(resp_code, data)
         else:
             raise Exception("unknown msg code %s" % resp_code)
